@@ -1,0 +1,8 @@
+media
+static
+venv/
+.idea
+.env
+dba.sqlite3
+images
+
