@@ -13,7 +13,7 @@ INSTALLED_LIBRARIES = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "rest_framework.authtoken",
+    "drf_yasg",
 ]
 INSTALLED_APPS = (
     [

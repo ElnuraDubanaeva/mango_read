@@ -18,12 +18,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from decouple import config
+from .settings.drf_yasg import urlpatterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/v1/auth/", include("api.users.urls")),
+    path("accounts/", include("api.users.urls")),
     path("api/v1/home/", include("api.card.urls")),
-]
+] + urlpatterns
 if config("DEBUG"):
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
