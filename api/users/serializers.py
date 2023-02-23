@@ -10,7 +10,7 @@ from django.contrib.auth.password_validation import validate_password
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'nickname', 'avatar')
+        fields = ("id", "username", "nickname", "avatar")
         # read_only_fields = ('password',)
 
 
@@ -26,7 +26,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         style={"input_type": "password"},
     )
     nickname = serializers.CharField(required=True)
-    avatar = serializers.ImageField(default="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg")
+    avatar = serializers.ImageField(
+        default="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+    )
 
     class Meta:
         model = User
@@ -45,22 +47,24 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=30, min_length=3)
-    password = serializers.CharField(max_length=50, min_length=6, write_only=True, style={'input_type': 'password'})
+    password = serializers.CharField(
+        max_length=50, min_length=6, write_only=True, style={"input_type": "password"}
+    )
     tokens = serializers.CharField(max_length=60, min_length=8, read_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'tokens')
+        fields = ("username", "password", "tokens")
 
     def validate(self, attrs):
-        username = attrs.get('username', '')
-        password = attrs.get('password', '')
+        username = attrs.get("username", "")
+        password = attrs.get("password", "")
         user = authenticate(username=username, password=password)
         if not user:
-            raise AuthenticationFailed('Invalid credentials, try again')
+            raise AuthenticationFailed("Invalid credentials, try again")
         if not user.is_active:
-            raise AuthenticationFailed('Account is disabled, contact admin')
+            raise AuthenticationFailed("Account is disabled, contact admin")
         return {
-            'username': user.username,
-            'tokens': user.tokens(),
+            "username": user.username,
+            "tokens": user.tokens(),
         }

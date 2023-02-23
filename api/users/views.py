@@ -27,4 +27,4 @@ class UserListView(ModelViewSet):
     queryset = User.objects.all()
     # permission_classes = (IsAdminUser,)
     serializer_class = UsersSerializer
-    lookup_field = 'id'
+    lookup_field = "id"

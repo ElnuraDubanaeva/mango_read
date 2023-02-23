@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.core.validators import FileExtensionValidator
+from django.utils.safestring import mark_safe
 from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import path_and_rename
 from .managers import UserManager
@@ -11,19 +12,22 @@ class BaseModel(models.Model):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=100, unique=True)
-    nickname = models.CharField(max_length=50)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    date_joined = models.DateField(auto_now_add=True)
-    last_login = models.DateField(auto_now=True)
+    username = models.CharField(
+        max_length=100, unique=True, db_index=True, verbose_name="Имя"
+    )
+    nickname = models.CharField(max_length=50, verbose_name="Прозвище")
+    is_active = models.BooleanField(default=True, verbose_name="Активен")
+    is_staff = models.BooleanField(default=False, verbose_name="Сотрудник")
+    is_superuser = models.BooleanField(default=False, verbose_name="Суперюзер")
+    date_joined = models.DateField(auto_now_add=True, verbose_name="Дата регистраций")
+    last_login = models.DateField(auto_now=True, verbose_name="Дата последнего логина")
     avatar = models.ImageField(
         upload_to=path_and_rename,
         blank=True,
-        default="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg",
+        verbose_name="Аватарка",
+        default="user_images/default_user_image/default_user_image.jpeg",
         validators=[
-            FileExtensionValidator(allowed_extensions=["jpg", "png", "img"]),
+            FileExtensionValidator(allowed_extensions=["jpeg", "png", "img"]),
         ],
     )
 
@@ -34,15 +38,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def img_preview(self):
         if self.avatar:
-            return f'<src img = "{self.avatar.url} width = "60" height = "60"">'
+            return mark_safe(
+                f'<img src= "{self.avatar.url}" width = "60" height = "60"/>'
+            )
         return "None"
 
     def tokens(self):
         refresh = RefreshToken.for_user(self)
-        return {
-            'access': str(refresh.access_token),
-            'refresh': str(refresh)
-        }
+        return {"access": str(refresh.access_token), "refresh": str(refresh)}
 
     def str(self):
         return self.username
