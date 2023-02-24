@@ -3,7 +3,7 @@ static
 venv/
 .idea
 .env
-dba.sqlite3
+db1.sqlite3
 images
 migrations
 
