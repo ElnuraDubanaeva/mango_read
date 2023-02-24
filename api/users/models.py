@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.core.validators import FileExtensionValidator
-from django.utils.safestring import mark_safe
 from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import path_and_rename
 from .managers import UserManager
@@ -13,7 +12,7 @@ class BaseModel(models.Model):
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
-        max_length=100, unique=True, db_index=True, verbose_name="Имя"
+        max_length=100, unique=True, db_index=True, verbose_name="Имя", name="username"
     )
     nickname = models.CharField(max_length=50, verbose_name="Прозвище")
     is_active = models.BooleanField(default=True, verbose_name="Активен")
@@ -32,23 +31,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["nickname", "password"]
+    REQUIRED_FIELDS = [
+        "nickname",
+    ]
     objects = UserManager()
-
-    @property
-    def img_preview(self):
-        if self.avatar:
-            return mark_safe(
-                f'<img src= "{self.avatar.url}" width = "60" height = "60"/>'
-            )
-        return "None"
 
     def tokens(self):
         refresh = RefreshToken.for_user(self)
         return {"access": str(refresh.access_token), "refresh": str(refresh)}
 
-    def str(self):
-        return self.username
+    def __str__(self):
+        return f"{self.username}, {self.nickname}"
 
     class Meta:
         verbose_name = "Пользователь"

@@ -4,12 +4,9 @@ from django.utils.safestring import mark_safe
 from .models import User
 
 
-# Register your models here.
-
-
-# @admin.register(User)
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("id", "username", "nickname", "img_preview")
+    list_display = ("id", "username", "nickname", "preview")
     fields = (
         "username",
         "nickname",
@@ -26,7 +23,4 @@ class UserAdmin(admin.ModelAdmin):
     readonly_fields = ("preview",)
 
     def preview(self, obj):
-        return mark_safe(f'<img src= "{obj.avatar.url}" style="max-height:100pk;" />')
-
-
-admin.site.register(User, UserAdmin)
+        return mark_safe(f"<img src= '{obj.avatar.url}' style='max-height:100pk;' />")

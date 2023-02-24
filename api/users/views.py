@@ -25,6 +25,6 @@ class LoginView(APIView):
 
 class UserListView(ModelViewSet):
     queryset = User.objects.all()
-    # permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser,)
     serializer_class = UsersSerializer
     lookup_field = "id"

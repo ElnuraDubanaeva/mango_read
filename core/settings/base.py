@@ -14,6 +14,7 @@ INSTALLED_LIBRARIES = [
     "rest_framework_simplejwt",
     "corsheaders",
     "drf_yasg",
+    "django_filters",
 ]
 INSTALLED_APPS = (
     [

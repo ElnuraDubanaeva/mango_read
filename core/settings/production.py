@@ -1,5 +1,7 @@
 from decouple import config
 
+from django.contrib.auth.password_validation import UserAttributeSimilarityValidator
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",

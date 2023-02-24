@@ -11,7 +11,6 @@ class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "username", "nickname", "avatar")
-        # read_only_fields = ('password',)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -20,6 +19,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
 
     password = serializers.CharField(
+        max_length=20,
+        min_length=6,
         required=True,
         write_only=True,
         validators=[validate_password],

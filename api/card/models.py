@@ -1,12 +1,12 @@
 from django.db import models
 from pytils import translit
-from .utils import path_and_rename
+from .utils import path_and_rename_cover
 from django.core.validators import FileExtensionValidator
 
 
 # Create your models here.
 class Genre(models.Model):
-    mango_genre = models.CharField(
+    genre_of_mango = models.CharField(
         max_length=50, blank=True, unique=True, name="genre", verbose_name="Жанр"
     )
 
@@ -41,16 +41,18 @@ class Mango(models.Model):
         verbose_name="Название манги",
         db_index=True,
     )
-    mango_genre = models.ManyToManyField(Genre, related_name="mango_genre")
-    mango_type = models.ForeignKey(
-        Type, on_delete=models.CASCADE, related_name="mango_type", blank=True, null=True
+    mango_genre = models.ManyToManyField(
+        Genre, related_name="mango_genre", verbose_name="Жанр"
     )
-    mango_year = models.DateField(verbose_name="Год выпуска", null=True, blank=True)
+    mango_type = models.ForeignKey(
+        Type, on_delete=models.CASCADE, related_name="mango_type", verbose_name="Тип"
+    )
+    mango_year = models.DateField(verbose_name="Год", null=True, blank=True)
     mango_slug = models.SlugField(
         unique=True, db_index=True, verbose_name="URL", default=""
     )
     mango_cover = models.ImageField(
-        upload_to=path_and_rename,
+        upload_to=path_and_rename_cover,
         blank=True,
         default="",
         null=True,
@@ -69,13 +71,8 @@ class Mango(models.Model):
     def __str__(self):
         return self.mango_name
 
-    @property
-    def img_preview(self):
-        if self.mango_cover:
-            return f'<src img = "{self.mango_cover.url}" width = "60" height = "60">'
-
     class Meta:
-        ordering = ("mango_name", "mango_slug")
+        ordering = ("mango_slug",)
         verbose_name = "Манга"
         verbose_name_plural = "Манга"
 
@@ -92,4 +89,4 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f"User {self.mango_user} commented {self.mango} : {self.comment}"
+        return f"{self.mango_user.avatar}{self.mango_user.username},{self.mango_user.nickname}\n{self.comment}"
