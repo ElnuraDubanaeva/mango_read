@@ -1,10 +1,18 @@
-from django.contrib import auth
+# django local
+from django.contrib.auth import password_validation
 from django.contrib.auth import authenticate
-from rest_framework import serializers
+
+# rest framework
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.validators import UniqueValidator
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
+# current app
 from .models import User
-from django.contrib.auth.password_validation import validate_password
+
+# libraries
+import re
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -15,7 +23,9 @@ class UsersSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        required=True, validators=[UniqueValidator(queryset=User.objects.all())]
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        help_text="Username should contain only alphabetical characters",
     )
 
     password = serializers.CharField(
@@ -23,10 +33,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         min_length=6,
         required=True,
         write_only=True,
-        validators=[validate_password],
         style={"input_type": "password"},
+        validators=[password_validation.validate_password],
+        help_text=password_validation.password_validators_help_texts(),
     )
-    nickname = serializers.CharField(required=True)
+    nickname = serializers.CharField(
+        required=True,
+        help_text="Nickname should contain only alphanumerical characters",
+    )
     avatar = serializers.ImageField(
         default="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
     )
@@ -34,6 +48,22 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("username", "avatar", "nickname", "password")
+
+    def validate(self, attrs):
+        username = attrs.get("username", "")
+        nickname = attrs.get("nickname", "")
+        if re.findall("[#$%!^&*0-9]", username):
+            raise ValidationError(
+                "Username should contain only alphabetical characters"
+            )
+        if not str(nickname).isalnum():
+            raise ValidationError(
+                "Nickname should contain only alphanumerical characters"
+            )
+        if username == nickname:
+            raise ValidationError("Username and Nickname cant be the same")
+
+        return super(RegisterSerializer, self).validate(attrs)
 
     def create(self, validated_data):
         user = User.objects.create(

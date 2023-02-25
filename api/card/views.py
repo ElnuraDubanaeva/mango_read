@@ -1,7 +1,17 @@
-from rest_framework import status
-from rest_framework.response import Response
+# rest framework
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ModelViewSet
-from api.users.models import User
+
+# libraries
+from django_filters.rest_framework import DjangoFilterBackend
+
+# current app
+from .pagination import MangoReadPagination, CommentReadPagination
+from .models import Mango, Type, Genre, Comment
+from .permissions import IsAuthorComment
+from .filters import MangoFilter
 from .serializers import (
     MangoSerializer,
     TypeSerializer,
@@ -9,13 +19,6 @@ from .serializers import (
     CommentSerializer,
     MangoDetailSerializer,
 )
-from .models import Mango, Type, Genre, Comment
-from .pagination import MangoReadPagination, CommentReadPagination
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.filters import OrderingFilter, SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .filters import MangoFilter
 
 
 class MangoViewSet(ModelViewSet):
@@ -28,10 +31,10 @@ class MangoViewSet(ModelViewSet):
     lookup_field = "mango_slug"
     pagination_class = MangoReadPagination
     authentication_classes = (JWTAuthentication,)
-    # permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
     filterset_class = MangoFilter
-    search_fields = ("mango_genre",)
+    search_fields = ("mango_name", "mango_type__type")
     ordering_fields = ("mango_year",)
 
 
@@ -39,21 +42,23 @@ class TypeViewSet(ModelViewSet):
     queryset = Type.objects.all()
     serializer_class = TypeSerializer
     lookup_field = "id"
+    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
 
 
 class GenreViewSet(ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = "id"
+    filter_backends = (DjangoFilterBackend, OrderingFilter, SearchFilter)
 
 
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all().order_by("-id")
     serializer_class = CommentSerializer
     authentication_classes = (JWTAuthentication,)
-    # permission_classes = [IsAuthenticatedOrReadOnly,]
+    permission_classes = (IsAuthorComment,)
     pagination_class = CommentReadPagination
-    #
+
     # def create(self, request, *args, **kwargs):
     #     user = User.objects.get(id=request.user.id)
     #     serializer = self.get_serializer_class()(data=request.data)

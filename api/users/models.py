@@ -26,7 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name="Аватарка",
         default="user_images/default_user_image/default_user_image.jpeg",
         validators=[
-            FileExtensionValidator(allowed_extensions=["jpeg", "png", "img"]),
+            FileExtensionValidator(allowed_extensions=["jpeg", "png", "jpg"]),
         ],
     )
 

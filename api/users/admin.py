@@ -1,6 +1,8 @@
+# local
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
+# current app
 from .models import User
 
 
@@ -23,4 +25,8 @@ class UserAdmin(admin.ModelAdmin):
     readonly_fields = ("preview",)
 
     def preview(self, obj):
-        return mark_safe(f"<img src= '{obj.avatar.url}' style='max-height:100pk;' />")
+        if obj.avatar:
+            return mark_safe(
+                f"<img src= '{obj.avatar.url}' style='max-height:100pk;' />"
+            )
+        return "None"

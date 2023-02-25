@@ -4,12 +4,14 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 from .development import *
+from .production import *
 
-SECRET_KEY = "django-insecure-iv-w8#&@*d84)-fx2c+=*n+bc1gv%c*f()ducp$3%4$80#+3b!"
+SECRET_KEY = config("SECRET_KEY")
 AUTH_USER_MODEL = "users.User"
 
 APPS = ["api.card", "api.users"]
 INSTALLED_LIBRARIES = [
+    "jazzmin",
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
@@ -18,7 +20,6 @@ INSTALLED_LIBRARIES = [
 ]
 INSTALLED_APPS = (
     [
-        "jazzmin",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
@@ -27,8 +28,9 @@ INSTALLED_APPS = (
         "django.contrib.staticfiles",
     ]
     + APPS
-    + INSTALLED_LIBRARIES
+    + INSTALLED_LIBRARIES[1:]
 )
+INSTALLED_APPS.insert(0, INSTALLED_LIBRARIES[0])
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -59,7 +61,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
-LANGUAGE_CODE = "ru"
+LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
 USE_TZ = True

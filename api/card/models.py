@@ -1,10 +1,14 @@
+# django local
 from django.db import models
-from pytils import translit
-from .utils import path_and_rename_cover
 from django.core.validators import FileExtensionValidator
 
+# current app
+from .utils import path_and_rename_cover
 
-# Create your models here.
+# libraries
+from pytils import translit
+
+
 class Genre(models.Model):
     genre_of_mango = models.CharField(
         max_length=50, blank=True, unique=True, name="genre", verbose_name="Жанр"
@@ -51,11 +55,15 @@ class Mango(models.Model):
     mango_slug = models.SlugField(
         unique=True, db_index=True, verbose_name="URL", default=""
     )
+    cover_height = models.IntegerField(default="1024")
+    cover_width = models.IntegerField(default="1024")
     mango_cover = models.ImageField(
         upload_to=path_and_rename_cover,
         blank=True,
         default="",
         null=True,
+        width_field="cover_width",
+        height_field="cover_height",
         verbose_name="Обложка манги",
         validators=(FileExtensionValidator(allowed_extensions=["png", "jpeg", "img"]),),
     )
@@ -90,3 +98,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.mango_user.avatar}{self.mango_user.username},{self.mango_user.nickname}\n{self.comment}"
+
+    class Meta:
+        verbose_name = "Коментарий"
+        verbose_name_plural = "Коментарии"

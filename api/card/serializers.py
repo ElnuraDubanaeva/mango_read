@@ -1,12 +1,19 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from .models import Mango, Type, Comment, Genre
 from api.users.models import User
+from django import conf
 
 
 class AuthorCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("username", "nickname")
+        fields = ("username", "nickname", "avatar")
+        extra_kwargs = {
+            "username": {"read_only": True},
+            "nickname": {"read_only": True},
+            "avatar": {"read_only": True},
+        }
 
 
 class TypeSerializer(serializers.ModelSerializer):
@@ -21,52 +28,53 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    # mango = serializers.SerializerMethodField()
-    mango_id = serializers.CharField(read_only=True)
-    mango_user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    comment = serializers.CharField(max_length=100, min_length=1, required=False)
-
-    class Meta:
-        model = Comment
-        fields = (
-            "id",
-            "comment",
-            "mango_user_id",
-            "mango_user",
-            "mango",
-            "mango_id",
-        )
-
-        extra_kwargs = {
-            "mango_user": {"read_only": True},
-        }
-
-    #
-    def get_mango(self, instance):
-        return instance.mango.mango_name
-
-    #
-    # def get_mango_id(self, instance):
-    #     return instance.mango.id
-
-
 class MangoSerializer(serializers.ModelSerializer):
     mango_genre = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Genre.objects.all(), write_only=True
     )
-    mango_slug = serializers.HiddenField(default="")
-    mango_name = serializers.CharField(max_length=50, min_length=2)
+    mango_slug = serializers.HiddenField(
+        default="", validators=[UniqueValidator(queryset=Mango.objects.all())]
+    )
+    mango_name = serializers.CharField(
+        max_length=50,
+        min_length=2,
+        validators=[UniqueValidator(queryset=Mango.objects.all())],
+    )
     mango_cover = serializers.ImageField(default="")
 
     class Meta:
         model = Mango
-        fields = "__all__"
+        exclude = ("cover_width", "cover_height")
         extra_kwargs = {
             "mango_genre": {"write_only": True},
             "mango_type": {"write_only": True},
             "mango_synopsys": {"write_only": True},
         }
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    mango = serializers.SerializerMethodField(
+        default=serializers.CharField(read_only=True)
+    )
+    mango_user = AuthorCommentSerializer(default=serializers.CurrentUserDefault())
+    comment = serializers.CharField(max_length=100, min_length=1, required=False)
+    mango_id = serializers.CharField()
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+
+        extra_kwargs = {
+            "mango_user": {"read_only": True},
+            "mango_user_id": {"read_only": True},
+            "mango_id": {"read_only": True},
+        }
+
+    def get_mango(self, instance):
+        return instance.mango.mango_name
+
+    def get_mango_user(self, instance):
+        return f"{instance.mango_user.username}, {instance.mango_user.nickname}"
 
 
 class MangoDetailSerializer(serializers.ModelSerializer):
@@ -79,4 +87,4 @@ class MangoDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Mango
-        fields = "__all__"
+        exclude = ("cover_width", "cover_height")

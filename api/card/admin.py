@@ -1,6 +1,9 @@
+# django loca
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from .models import Mango, Genre, Type
+
+# current app
+from .models import Mango, Genre, Type, Comment
 
 
 @admin.register(Mango)
@@ -12,9 +15,9 @@ class MangoAdmin(admin.ModelAdmin):
         "mango_genre",
         "mango_year",
         "mango_synopsys",
-        "mango_slug",
         "preview",
         "mango_cover",
+        "mango_slug",
     )
     list_display_links = ("mango_name",)
     search_fields = ("mango_name",)
@@ -41,3 +44,13 @@ class TypeAdmin(admin.ModelAdmin):
     list_display = ("id", "type")
     list_display_links = ("type",)
     search_fields = ("mango_type",)
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "mango",
+    )
+    list_display_links = ("mango",)
+    search_fields = ("mango", "mango_user")
