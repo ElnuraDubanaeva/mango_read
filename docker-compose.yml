@@ -1,0 +1,46 @@
+version: '3.3'
+
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  web:
+    build: .
+    container_name: mango_web
+    command: sh -c 'python manage.py makemigrations && python manage.py migrate &&
+      python manage.py collectstatic --no-input && gunicorn -b 0.0.0.0:8000 core.wsgi --reload'
+    restart: always
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+    volumes:
+      - .:/mango_app
+      - ./static:/static
+      - ./media:/media
+  nginx:
+    image: nginx:latest
+    container_name: mango_nginx
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+      - db
+volumes:
+  postgres_data:
+    
+
+
+

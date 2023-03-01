@@ -37,6 +37,12 @@ class MangoViewSet(ModelViewSet):
     search_fields = ("mango_name", "mango_type__type")
     ordering_fields = ("mango_year",)
 
+    def allowed_methods(self):
+        if not self.request.user.is_stuff:
+            self.http_method_names = ("get",)
+        return self.http_method_names
+
+
 
 class TypeViewSet(ModelViewSet):
     queryset = Type.objects.all()
@@ -58,14 +64,3 @@ class CommentViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthorComment,)
     pagination_class = CommentReadPagination
-
-    # def create(self, request, *args, **kwargs):
-    #     user = User.objects.get(id=request.user.id)
-    #     serializer = self.get_serializer_class()(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     mango = serializer.validated_data.get('mango')
-    #     comment = serializer.validated_data.get('comment')
-    #     comment = Comment.objects.create(mango_user=user, mango=mango,
-    #                                      comment=comment)
-    #     comment.save()
-    #     return Response(data=self.get_serializer_class()(comment).data, status=status.HTTP_201_CREATED)
