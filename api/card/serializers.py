@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from .models import Mango, Type, Comment, Genre
 from api.users.models import User
-from django import conf
 
 
 class AuthorCommentSerializer(serializers.ModelSerializer):
@@ -46,7 +45,6 @@ class MangoSerializer(serializers.ModelSerializer):
         model = Mango
         exclude = ("cover_width", "cover_height")
         extra_kwargs = {
-            "mango_genre": {"write_only": True},
             "mango_type": {"write_only": True},
             "mango_synopsys": {"write_only": True},
         }
@@ -56,18 +54,18 @@ class CommentSerializer(serializers.ModelSerializer):
     mango = serializers.SerializerMethodField(
         default=serializers.CharField(read_only=True)
     )
-    mango_user = AuthorCommentSerializer(default=serializers.CurrentUserDefault())
+    mango_user = AuthorCommentSerializer(
+        default=serializers.CurrentUserDefault(), read_only=True
+    )
     comment = serializers.CharField(max_length=100, min_length=1, required=False)
-    mango_id = serializers.CharField()
+    mango_id = serializers.CharField(read_only=True)
 
     class Meta:
         model = Comment
         fields = "__all__"
 
         extra_kwargs = {
-            "mango_user": {"read_only": True},
             "mango_user_id": {"read_only": True},
-            "mango_id": {"read_only": True},
         }
 
     def get_mango(self, instance):

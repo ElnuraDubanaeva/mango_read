@@ -3,6 +3,7 @@ from rest_framework.serializers import ValidationError
 import re
 
 
+# included this validators in settings django default password validators
 class UppercaseValidator(object):
     """The password must contain at least 1 uppercase letter, A-Z."""
 
