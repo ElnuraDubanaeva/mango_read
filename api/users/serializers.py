@@ -76,16 +76,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class LoginSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(max_length=30, min_length=3)
-    password = serializers.CharField(
-        max_length=50, min_length=6, write_only=True, style={"input_type": "password"}
-    )
-    tokens = serializers.CharField(max_length=60, min_length=8, read_only=True)
-
-    class Meta:
-        model = User
-        fields = ("username", "password", "tokens")
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+    tokens = serializers.CharField(read_only=True)
 
     def validate(self, attrs):
         username = attrs.get("username", "")
